@@ -43,6 +43,15 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim();
 });
 
+function isInArray(string, array) {
+  for (var i = 0; i < array.length; i++) {
+    if (array[i] === string) {
+      return true;
+    }
+  }
+  return false;
+}
+
 self.addEventListener('fetch', function(event) {
   var url = 'https://httpbin.org/get';
 
@@ -57,7 +66,7 @@ self.addEventListener('fetch', function(event) {
             });
       })
     );
-  } else if ( new RegExp('\\b' + STATIC_FILES.join('\\b|\\b') + '\\b').test(event.request.url())) {
+  } else if (isInArray(event.request.url, STATIC_FILES)) {
     event.respondWith(
       caches.match(event.request)
     );
