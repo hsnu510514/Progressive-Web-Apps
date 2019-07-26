@@ -52,6 +52,19 @@ function isInArray(string, array) {
   return false;
 }
 
+// function trimCache(cacheName, maxItems) {
+//   caches.open(cacheName)
+//     .then(function(cache) {
+//       return cache.keys()
+//         .then(function(keys) {
+//           if (keys.length > maxItems) {
+//             cache.delete(keys[0])
+//               .then(trimCache(cacheName, maxItems));
+//           }
+//         });
+//     })
+// }
+
 self.addEventListener('fetch', function(event) {
   var url = 'https://httpbin.org/get';
 
@@ -61,6 +74,7 @@ self.addEventListener('fetch', function(event) {
         .then(function(cache) {
           return fetch(event.request)
             .then(function(res) {
+              // trimCache(CACHE_DYNAMIC_NAME, 3);
               cache.put(event.request, res.clone());
               return res;
             });
@@ -88,7 +102,7 @@ self.addEventListener('fetch', function(event) {
               .catch(function(err) {
                 return caches.open(CACHE_STATIC_NAME)
                   .then(function(cache) {
-                    if (event.request.url.indexOf('/help')) {
+                    if (event.request.headers.get('accept').includes('text/html')) {
                       return cache.match('/offline.html');
                     }
                   })
