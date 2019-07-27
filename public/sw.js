@@ -1,11 +1,14 @@
-var CACHE_STATIC_NAME = 'static-v4';
-var CACHE_DYNAMIC_NAME = 'dynamic-v4'
+importScripts('/src/js/idb.js');
+
+var CACHE_STATIC_NAME = 'static-v5';
+var CACHE_DYNAMIC_NAME = 'dynamic-v5'
 var STATIC_FILES = [
   '/',
   '/index.html',
   '/offline.html',
   'src/js/app.js',
   'src/js/feed.js',
+  'src/js/idb.js',
   'src/js/material.min.js',
   '/src/css/app.css',
   '/src/css/feed.css',
@@ -15,6 +18,11 @@ var STATIC_FILES = [
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
   ];
 
+var dbPromise = idb.open('posts-store', 1, function(db) {
+  if(!db.objectStoreNames.contains('posts')) {
+    db.createObjectStore('posts', {keyPath: 'id'});
+  }
+})
 
 self.addEventListener('install', function(event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
@@ -66,18 +74,27 @@ function isInArray(string, array) {
 // }
 
 self.addEventListener('fetch', function(event) {
-  var url = 'https://httpbin.org/get';
 
+  var url = 'https://pwagram0719.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
-    event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME)
-        .then(function(cache) {
-          return fetch(event.request)
-            .then(function(res) {
-              // trimCache(CACHE_DYNAMIC_NAME, 3);
-              cache.put(event.request, res.clone());
-              return res;
-            });
+    event.respondWith(fetch(event.request)
+        .then(function(res) {
+          var clonedRes = res.clone();
+          clonedRes.json()
+            .then(function(data) {
+              for (var key in data) {
+                console.log(data);
+                console.log(data[key]);
+                dbPromise
+                  .then(function(db) {
+                    var tx = db.transaction('posts', 'readwrite');
+                    var store = tx.objectStore('posts');
+                    store.put(data[key]);
+                    return tx.complete;
+                  })
+              }
+            })
+          return res;
       })
     );
   } else if (isInArray(event.request.url, STATIC_FILES)) {
