@@ -1,5 +1,5 @@
 importScripts('/src/js/idb.js');
-importSctipts('/src/js/utility.js');
+importScripts('/src/js/utility.js');
 
 var CACHE_STATIC_NAME = 'static-v5';
 var CACHE_DYNAMIC_NAME = 'dynamic-v5'
@@ -17,25 +17,25 @@ var STATIC_FILES = [
   'https://fonts.googleapis.com/css?family=Roboto:400,700',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-  ];
+];
 
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
   event.waitUntil(
     caches.open(CACHE_STATIC_NAME)
-      .then(function(cache) {
+      .then(function (cache) {
         console.log('[Service Worker] Precaching App Shell');
         cache.addAll(STATIC_FILES);
       })
   )
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
   console.log('[Service Worker] Activating Service Worker ...', event);
   event.waitUntil(
     caches.keys()
-      .then(function(keyList) {
-        return Promise.all(keyList.map(function(key) {
+      .then(function (keyList) {
+        return Promise.all(keyList.map(function (key) {
           if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
             console.log('[Service Worker] Removing old cache.', key);
             return caches.delete(key);
@@ -68,19 +68,23 @@ function isInArray(string, array) {
 //     })
 // }
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function (event) {
 
   var url = 'https://pwagram0719.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(fetch(event.request)
-        .then(function(res) {
-          var clonedRes = res.clone();
-          clonedRes.json()
-            .then(function(data) {
-                writeData('posts', data[key]);
-              }
-            })
-          return res;
+      .then(function (res) {
+        var clonedRes = res.clone();
+        clearAllData('posts')
+          .then(function () {
+            return clonedRes.json()
+          })
+          .then(function (data) {
+            for (var key in data) {
+              writeData('posts', data[key]);
+            }
+          });
+        return res;
       })
     );
   } else if (isInArray(event.request.url, STATIC_FILES)) {
@@ -90,21 +94,21 @@ self.addEventListener('fetch', function(event) {
   } else {
     event.respondWith(
       caches.match(event.request)
-        .then(function(response) {
+        .then(function (response) {
           if (response) {
             return response;
           } else {
             return fetch(event.request)
-              .then(function(res) {
+              .then(function (res) {
                 return caches.open(CACHE_DYNAMIC_NAME)
-                  .then(function(cache) {
+                  .then(function (cache) {
                     cache.put(event.request.url, res.clone());
                     return res;
                   })
               })
-              .catch(function(err) {
+              .catch(function (err) {
                 return caches.open(CACHE_STATIC_NAME)
-                  .then(function(cache) {
+                  .then(function (cache) {
                     if (event.request.headers.get('accept').includes('text/html')) {
                       return cache.match('/offline.html');
                     }
