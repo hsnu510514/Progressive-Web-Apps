@@ -154,11 +154,12 @@ self.addEventListener('sync', function (event) {
       readAllData('sync-posts')
         .then(function (data) {
           for (var dt of data) {
-            fetch('https://pwagram0719.firebaseio.com/posts.json', {
+            fetch('https://us-central1-pwagram0719.cloudfunctions.net/storePostData', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*'
               },
               body: JSON.stringify({
                 id: dt.id,
@@ -170,7 +171,10 @@ self.addEventListener('sync', function (event) {
             .then(function (res) {
                 console.log('Sent data', res);
                 if(res.ok) {
-                  deleteItemFromData('sync-post', dt.id);
+                  res.json()
+                    .then(function(resData) {
+                      deleteItemFromData('sync-posts', resData.id);
+                    });
                 }
             })
             .catch(function(err) {
