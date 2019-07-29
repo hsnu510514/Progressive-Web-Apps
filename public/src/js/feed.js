@@ -2,6 +2,9 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
@@ -117,3 +120,13 @@ if ('indexedDB' in window) {
     })
 }
 
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+  
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please enter valid data');
+    return;
+  }
+
+  closeCreatePostModal();
+})

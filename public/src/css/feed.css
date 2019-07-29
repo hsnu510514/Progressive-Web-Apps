@@ -48,16 +48,16 @@
 }
 
 .shared-moment-card.mdl-card_title {
-  height: 120px;
+  height: 140px;
 }
 
-@media (min-height: 800px) {
+@media (min-height: 700px) {
   .shared-moment-card.mdl-card_title {
     height: 160px;
   }
 }
 
-@media (min-height: 1200px) {
+@media (min-height: 1000px) {
   .shared-moment-card.mdl-card_title {
     height: 200px;
   }
