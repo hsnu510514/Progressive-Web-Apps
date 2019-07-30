@@ -43,7 +43,7 @@ function displayConfirmNotification() {
     
     navigator.serviceWorker.ready
       .then(function(swreg) {
-        swreg.showNotification('Successfully subscribed! (from SW)', options);
+        swreg.showNotification('Successfully subscribed!', options);
       })  
   };
   // new Notification('Successfully subscribed!', options);
@@ -62,13 +62,36 @@ function configurePushSub() {
     })
     .then(function(sub) {
       if (sub === null) {
-        reg.pushManager.subscribe({
-          userVisibleOnly: true
+        var vapidPublicKey = 'BKo814-ZuO3PS3-AKHy3ZhMrKl-kLkHCoI0OjI8C_ELfWkEF6jopuuN3akp5EoEtH34uAW1jPNt5Tx8sdf0aLQw';
+        var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+        console.log(convertedVapidPublicKey);
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidPublicKey
         });
       } else {
-
+        console.log(convertedVapidPublicKey);
+        // We have a subacription
       }
     })
+    .then(function(newSub) {
+      return fetch('https://pwagram0719.firebaseio.com/subscriptions.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(newSub)
+      })
+    })
+    .then(function(res) {
+      if (res.ok) {
+        displayConfirmNotification()
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
 }
 
 function askForNotificationPermission() {
