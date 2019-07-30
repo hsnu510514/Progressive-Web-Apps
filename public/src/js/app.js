@@ -23,13 +23,27 @@ window.addEventListener('beforeinstallprompt', function(event){
   return false;
 });
 
+function displayConfirmNotification() {
+  if ('serviceWorker' in navigator) {
+    var options = {
+      body: 'You successfully subscribed to our Notification service'
+    };
+    
+    navigator.serviceWorker.ready
+      .then(function(swreg) {
+        swreg.showNotification('Successfully subscribed! (from SW)', options);
+      })  
+  };
+  // new Notification('Successfully subscribed!', options);
+}
+
 function askForNotificationPermission() {
   Notification.requestPermission(function(result) {
     console.log('User Choice', result);
     if (result !== 'granted') {
       console.log('No notification permission granted!');
     } else {
-      // Hide Button
+      displayConfirmNotification();
     }
   });
 }
