@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v9';
-var CACHE_DYNAMIC_NAME = 'dynamic-v9';
+var CACHE_STATIC_NAME = 'static-v15';
+var CACHE_DYNAMIC_NAME = 'dynamic-v15';
 var STATIC_FILES = [
   '/',
   '/index.html',
@@ -159,6 +159,8 @@ self.addEventListener('sync', function (event) {
             postData.append('id', dt.id);
             postData.append('title', dt.title);
             postData.append('location', dt.location);
+            postData.append('rawLocationLat', dt.lat);
+            postData.append('rawLocationLng', dt.lng);
             postData.append('file', dt.picture, dt.id + '.png');
 
             fetch('https://us-central1-pwagram0719.cloudfunctions.net/storePostData', {
