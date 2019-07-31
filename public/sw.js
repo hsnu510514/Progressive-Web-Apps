@@ -156,7 +156,7 @@ self.addEventListener('sync', function (event) {
           for (var dt of data) {
             var postData = new FormData();
             postData.append('id', dt.id);
-            postData.append('id', dt.title);
+            postData.append('title', dt.title);
             postData.append('location', dt.location);
             postData.append('file', dt.picture, dt.id + '.png');
 
